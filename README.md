@@ -11,7 +11,7 @@ yaml
 dependencies:
   flutter:
     sdk: flutter
-  flutter_inapp_purchase: ^5.0.0
+  flutter_inapp_purchase: ^0.0.1
 ```
 
 ### 1. Initialize the Store

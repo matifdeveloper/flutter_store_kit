@@ -20,19 +20,19 @@
 import 'package:flutter/foundation.dart';
 
 class ListenerManager<T> {
-  final ObserverList<Function(T)> _listeners = ObserverList<Function(T)>();
+  final List<VoidCallback> _listeners = [];
 
-  void addListener(Function(T) callback) {
-    _listeners.add(callback);
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
   }
 
-  void removeListener(Function(T) callback) {
-    _listeners.remove(callback);
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
   }
 
   void notifyListeners(T value) {
     for (var callback in _listeners) {
-      callback(value);
+      callback();
     }
   }
 }

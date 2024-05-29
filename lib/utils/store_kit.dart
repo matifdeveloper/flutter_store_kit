@@ -32,16 +32,16 @@ class StoreKit {
   late StreamSubscription<PurchasedItem?> _purchaseUpdatedSubscription;
   late StreamSubscription<PurchaseResult?> _purchaseErrorSubscription;
 
-  late ListenerManager<void> proStatusChangedListener;
+  late ListenerManager proStatusChangedListener;
   late ListenerManager<String> errorListener;
-  late ListenerManager<void> productsFetchedListener;
+  late ListenerManager productsFetchedListener;
   late SubscriptionManager subscriptionManager;
   late PurchaseHandler purchaseHandler;
 
   void initialize(List<String> subscriptionIds) {
-    proStatusChangedListener = ListenerManager<void>();
+    proStatusChangedListener = ListenerManager();
     errorListener = ListenerManager<String>();
-    productsFetchedListener = ListenerManager<void>();
+    productsFetchedListener = ListenerManager();
     subscriptionManager = SubscriptionManager(subscriptionIds);
     purchaseHandler = PurchaseHandler(proStatusChangedListener, errorListener);
 
