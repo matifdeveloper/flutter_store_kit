@@ -44,7 +44,7 @@ class StoreKit {
   final ListenerManager _listenerManager = ListenerManager.instance;
 
   // Initializes the connection to the in-app purchase service.
-  Future<void> initConnection(List<String> subscriptionIds) async {
+  Future<void> initialize(List<String> subscriptionIds) async {
     // Initialize the SubscriptionManager with subscription IDs.
     _subscriptionManager = SubscriptionManager(subscriptionIds);
 
