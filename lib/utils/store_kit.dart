@@ -19,77 +19,120 @@
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'listener_manager.dart';
-import 'subscription_manager.dart';
 import 'purchase_handler.dart';
+import 'subscription_manager.dart';
 
+// A singleton class that provides a service for managing in-app purchases.
 class StoreKit {
+  // Private constructor to ensure singleton instance.
   StoreKit._private();
+  // The singleton instance of the StoreService.
   static final StoreKit instance = StoreKit._private();
 
-  late StreamSubscription<ConnectionResult> _connectionSubscription;
-  late StreamSubscription<PurchasedItem?> _purchaseUpdatedSubscription;
-  late StreamSubscription<PurchaseResult?> _purchaseErrorSubscription;
+  // Late-initialized variables for stream subscriptions.
+  late final StreamSubscription<ConnectionResult> _connectionSubscription;
+  late final StreamSubscription<PurchasedItem?> _purchaseUpdatedSubscription;
+  late final StreamSubscription<PurchaseResult?> _purchaseErrorSubscription;
 
-  late ListenerManager proStatusChangedListener;
-  late ListenerManager<String> errorListener;
-  late ListenerManager productsFetchedListener;
-  late SubscriptionManager subscriptionManager;
-  late PurchaseHandler purchaseHandler;
+  // Instances of PurchaseHandler, SubscriptionManager, and ListenerManager.
+  final PurchaseHandler _purchaseHandler = PurchaseHandler();
+  late final SubscriptionManager _subscriptionManager;
+  final ListenerManager _listenerManager = ListenerManager.instance;
 
-  void initialize(List<String> subscriptionIds) {
-    proStatusChangedListener = ListenerManager();
-    errorListener = ListenerManager<String>();
-    productsFetchedListener = ListenerManager();
-    subscriptionManager = SubscriptionManager(subscriptionIds);
-    purchaseHandler = PurchaseHandler(proStatusChangedListener, errorListener);
+  // Initializes the connection to the in-app purchase service.
+  Future<void> initConnection(List<String> subscriptionIds) async {
+    // Initialize the SubscriptionManager with subscription IDs.
+    _subscriptionManager = SubscriptionManager(subscriptionIds);
 
-    initConnection();
-  }
-
-  Future<void> initConnection() async {
     try {
+      // Initialize the FlutterInappPurchase instance.
       final initResult = await FlutterInappPurchase.instance.initialize();
+      // Log the initialization result.
       if (kDebugMode) {
         print(initResult ?? 'unknown');
       }
     } catch (e) {
+      // Log any errors that occur during initialization.
       if (kDebugMode) {
         print(e.toString());
       }
     }
 
-    _connectionSubscription = FlutterInappPurchase.connectionUpdated.listen((connected) {});
-    _purchaseUpdatedSubscription = FlutterInappPurchase.purchaseUpdated.listen(purchaseHandler.handlePurchaseUpdate);
-    _purchaseErrorSubscription = FlutterInappPurchase.purchaseError.listen(purchaseHandler.handlePurchaseError);
+    // Listen for connection updates.
+    _connectionSubscription = FlutterInappPurchase.connectionUpdated.listen((_) {});
+    // Listen for purchase updates and handle them using the PurchaseHandler.
+    _purchaseUpdatedSubscription = FlutterInappPurchase.purchaseUpdated.listen(_purchaseHandler.handlePurchaseUpdate);
+    // Listen for purchase errors and notify error listeners.
+    _purchaseErrorSubscription = FlutterInappPurchase.purchaseError.listen((error) {
+      if (error != null) {
+        // Notify error listeners with the error message.
+        _listenerManager.notifyErrorListeners(error.message!);
+      }
+    });
 
-    await subscriptionManager.fetchSubscriptionItems();
-    productsFetchedListener.notifyListeners(null);
+    // Fetch subscription items.
+    await _subscriptionManager.fetchSubscriptionItems();
   }
 
+  // Disposes of the stream subscriptions and finalizes the FlutterInappPurchase instance.
   void dispose() {
     _connectionSubscription.cancel();
-    _purchaseErrorSubscription.cancel();
     _purchaseUpdatedSubscription.cancel();
+    _purchaseErrorSubscription.cancel();
     FlutterInappPurchase.instance.finalize();
   }
 
+  // Adds a listener for pro status changes.
+  void addProStatusChangedListener(VoidCallback callback) => _listenerManager.addProStatusChangedListener(callback);
+  // Removes a listener for pro status changes.
+  void removeProStatusChangedListener(VoidCallback callback) => _listenerManager.removeProStatusChangedListener(callback);
+  // Adds a listener for errors.
+  void addErrorListener(ValueChanged<String> callback) => _listenerManager.addErrorListener(callback);
+  // Removes a listener for errors.
+  void removeErrorListener(ValueChanged<String> callback) => _listenerManager.removeErrorListener(callback);
+
+  // Restores past purchases for the user.
+  Future<void> restorePastPurchases(BuildContext context) async {
+    // Restore past purchases using the SubscriptionManager.
+    await _subscriptionManager.restorePastPurchases(context, _listenerManager);
+  }
+
+  // Purchases a subscription item.
   Future<void> purchaseSubscription(IAPItem item) async {
     try {
+      // Request a subscription purchase using the FlutterInappPurchase instance.
       await FlutterInappPurchase.instance.requestSubscription(item.productId!);
-    } catch (error) {
+    } catch (e) {
+      // Log any errors that occur during the purchase.
       if (kDebugMode) {
-        print(error);
+        print("Failed to purchase subscription: $e");
       }
     }
   }
 
-  bool isProductPurchased(String productId) {
-    return purchaseHandler.isProductPurchased(productId);
+  // Opens the subscription management page for the user.
+  Future<void> openSubscriptionManagementPage() async {
+    // Construct the Android URL for the subscription management page.
+    final androidUrl = Uri.parse('https://play.google.com/store/account/subscriptions');
+
+    // Check if the URL can be launched.
+    if (await canLaunchUrl(androidUrl)) {
+      // Launch the URL.
+      await launchUrl(androidUrl);
+    } else {
+      // Log an error if the URL cannot be launched.
+      if (kDebugMode) {
+        print("Unable to launch subscription management page.");
+      }
+    }
   }
 
-  List<String> getPurchasedProductIds() {
-    return purchaseHandler.getPurchasedProductIds();
-  }
+  // Checks if a product has been purchased.
+  bool isProductPurchased(String productId) => _purchaseHandler.isProductPurchased(productId);
+  // Gets a list of purchased product IDs.
+  List<String> getPurchasedProductIds() => _purchaseHandler.getPurchasedProductIds();
 }

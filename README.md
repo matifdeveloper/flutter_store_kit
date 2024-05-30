@@ -1,78 +1,111 @@
-# Flutter In-App Purchase Library
+# FlutterStoreKit Library
 
-A Flutter library to manage in-app purchases easily with a streamlined API. This library provides classes to handle subscriptions, manage listeners, and process purchases with a single instance.
+FlutterStoreKit is a Flutter library that provides functionality for managing in-app purchases and subscriptions. This documentation outlines how to use the FlutterStoreKit library in your Flutter app.
 
 ## Installation
 
 Add the following to your `pubspec.yaml`:
 
-```
+```dart
 yaml
 dependencies:
   flutter:
     sdk: flutter
-  flutter_inapp_purchase: ^0.0.1
+  flutter_store_kit: ^1.0.0
 ```
 
 ### 1. Initialize the Store
 Initialize the store with your product IDs:
-```
+
+```dart
 void main() {
-  StoreService.instance.initialize([
-    'weekly',
-    'monthly',
-    'yearly',
+  StoreKit.instance.initialize([
+    'subscription_id1',
+    'subscription_id2',
+    'subscription_id3',
   ]);
 }
 ```
 
-### 2. Listen for Changes
-Add listeners for pro status changes, errors, and product fetching:
-```
+### 2. Add Listeners
+**Add Pro Status Changed Listener**
+Add a listener for pro status changes:
+
+```dart
 void _onProStatusChanged() {
-  // Handle pro status change
+  // Update UI based on purchase status
 }
 
+StoreKit.instance.addProStatusChangedListener(_onProStatusChanged);
+```
+
+**Remove Pro Status Changed Listener**
+Remove a listener for pro status changes:
+
+```dart
+StoreKit.instance.removeProStatusChangedListener(_onProStatusChanged);
+```
+
+**Add Error Listener**
+Add a listener for errors:
+
+```dart
 void _onError(String error) {
   // Handle error
+  print("Error: $error");
 }
 
-void _onProductsFetched() {
-  // Handle products fetched
-}
+StoreKit.instance.addErrorListener(_onError);
 
-StoreService.instance.proStatusChangedListener.addListener(_onProStatusChanged);
-StoreService.instance.errorListener.addListener(_onError);
-StoreService.instance.productsFetchedListener.addListener(_onProductsFetched);
 ```
 
-### 3. Fetch Available Products
-Fetch available subscription products:
-```
-void _fetchProducts() async {
-  await StoreService.instance.subscriptionManager.fetchSubscriptionItems();
-  List<IAPItem> products = StoreService.instance.subscriptionManager.subscriptionItems;
-  // Use the fetched products
-}
+**Remove Error Listener**
+Remove a listener for errors:
+
+```dart
+StoreKit.instance.removeErrorListener(_onError);
 ```
 
-### 4. Purchase a Subscription
-Initiate a purchase for a subscription:
+### 3. Purchases
+
+**Restore Past Purchases**
+Restore past purchases for the user:
+
+```dart
+await StoreKit.instance.restorePastPurchases(context);
 ```
-void _purchaseSubscription(IAPItem item) async {
-  await StoreService.instance.purchaseSubscription(item);
-}
+
+**Purchase a Subscription**
+Purchase a subscription item:
+
+```dart
+await StoreKit.instance.purchaseSubscription(subscriptionItem);
 ```
 
-### 5. Check Purchased Status
-Check if a specific product is purchased:
+**Open Subscription Management Page**
+Open the subscription management page for the user:
 
-```bool isPurchased = StoreService.instance.isProductPurchased('weekly');```
+```dart
+await StoreKit.instance.openSubscriptionManagementPage();
+```
 
-### 6. Get All Purchased Product IDs
-Get a list of all purchased product IDs:
+**Check if Product is Purchased**
+Check if a product has been purchased:
 
-```List<String> purchasedProductIds = StoreService.instance.getPurchasedProductIds();```
+```dart
+bool purchased = StoreKit.instance.isProductPurchased('product_id');
+```
 
+**Get Purchased Product IDs**
+Get a list of purchased product IDs:
 
-This `README.md` provides clear instructions on how to initialize and use the library, explaining the key methods with examples. Adjust any parts of the code or examples as needed to fit your specific implementation and requirements.
+```dart
+List<String> purchasedIds = StoreKit.instance.getPurchasedProductIds();
+```
+
+### 4. Disposal
+Dispose of the store instance:
+
+```dart
+StoreKit.instance.dispose();
+```
