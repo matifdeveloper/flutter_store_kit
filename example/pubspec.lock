@@ -81,12 +81,10 @@ packages:
   flutter_store_kit:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "6a7d626064322f3a46576a0c5164537f54d1aca8"
-      url: "https://github.com/matifdeveloper/flutter_store_kit"
-    source: git
-    version: "0.0.1"
+      path: ".."
+      relative: true
+    source: path
+    version: "0.0.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
