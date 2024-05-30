@@ -42,15 +42,17 @@ class SubscriptionManager {
   Future<void> fetchSubscriptionItems() async {
     try {
       // Fetch the subscription items from the store using the subscription IDs.
-      _subscriptionItems = await FlutterInappPurchase.instance.getSubscriptions(_subscriptionIds);
+      _subscriptionItems = await FlutterInappPurchase.instance
+          .getSubscriptions(_subscriptionIds);
 
       // Sort the subscription items in the order of their IDs.
-      _subscriptionItems.sort((a, b) => _subscriptionIds.indexOf(a.productId!).compareTo(_subscriptionIds.indexOf(b.productId!)));
+      _subscriptionItems.sort((a, b) => _subscriptionIds
+          .indexOf(a.productId!)
+          .compareTo(_subscriptionIds.indexOf(b.productId!)));
 
       if (kDebugMode) {
         print(_subscriptionItems);
       }
-
     } catch (e) {
       // Log an error if fetching subscription items fails.
       if (kDebugMode) {
@@ -60,10 +62,12 @@ class SubscriptionManager {
   }
 
   // A method to restore past purchases and update the pro status.
-  Future<void> restorePastPurchases(BuildContext context, ListenerManager listenerManager) async {
+  Future<void> restorePastPurchases(
+      BuildContext context, ListenerManager listenerManager) async {
     try {
       // Get a list of available purchases from the store.
-      List<PurchasedItem>? purchasedItems = await FlutterInappPurchase.instance.getAvailablePurchases();
+      List<PurchasedItem>? purchasedItems =
+          await FlutterInappPurchase.instance.getAvailablePurchases();
 
       if (purchasedItems != null) {
         // Iterate over each purchased item.
@@ -76,7 +80,8 @@ class SubscriptionManager {
               bool isValid = true;
               if (isValid) {
                 // Finish the transaction and notify pro status changed listeners.
-                await FlutterInappPurchase.instance.finishTransaction(purchasedItem);
+                await FlutterInappPurchase.instance
+                    .finishTransaction(purchasedItem);
                 listenerManager.notifyProStatusChangedListeners();
               }
             } else {
@@ -85,8 +90,10 @@ class SubscriptionManager {
             }
           } else if (Platform.isIOS) {
             // On iOS, finish the transaction and notify pro status changed listeners.
-            await FlutterInappPurchase.instance.finishTransaction(purchasedItem);
-            await FlutterInappPurchase.instance.finishTransactionIOS(purchasedItem.transactionId!);
+            await FlutterInappPurchase.instance
+                .finishTransaction(purchasedItem);
+            await FlutterInappPurchase.instance
+                .finishTransactionIOS(purchasedItem.transactionId!);
             listenerManager.notifyProStatusChangedListeners();
           }
         }
@@ -99,4 +106,3 @@ class SubscriptionManager {
     }
   }
 }
-

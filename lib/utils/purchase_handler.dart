@@ -46,26 +46,27 @@ class PurchaseHandler {
     // Switch based on the transaction state of the purchased item.
     switch (purchasedItem.transactionStateIOS) {
       case TransactionState.deferred:
-      // Handle deferred transaction state.
+        // Handle deferred transaction state.
         break;
       case TransactionState.failed:
-      // Notify error listeners if the transaction failed.
+        // Notify error listeners if the transaction failed.
         ListenerManager.instance.notifyErrorListeners("Transaction Failed");
         break;
       case TransactionState.purchased:
-      // Verify and finish the transaction if it's purchased.
+        // Verify and finish the transaction if it's purchased.
         await _verifyAndFinishTransaction(purchasedItem);
         break;
       case TransactionState.purchasing:
-      // Handle purchasing transaction state.
+        // Handle purchasing transaction state.
         break;
       case TransactionState.restored:
-      // Finish the transaction if it's restored.
+        // Finish the transaction if it's restored.
         await FlutterInappPurchase.instance.finishTransaction(purchasedItem);
-        await FlutterInappPurchase.instance.finishTransactionIOS(purchasedItem.transactionId!);
+        await FlutterInappPurchase.instance
+            .finishTransactionIOS(purchasedItem.transactionId!);
         break;
       default:
-      // Handle default transaction state.
+        // Handle default transaction state.
         break;
     }
   }
@@ -73,7 +74,8 @@ class PurchaseHandler {
   // Handles purchase updates specifically for Android.
   Future<void> _handlePurchaseUpdateAndroid(PurchasedItem purchasedItem) async {
     // Check if the purchase state is purchased and not acknowledged.
-    if (purchasedItem.purchaseStateAndroid == PurchaseState.purchased && !purchasedItem.isAcknowledgedAndroid!) {
+    if (purchasedItem.purchaseStateAndroid == PurchaseState.purchased &&
+        !purchasedItem.isAcknowledgedAndroid!) {
       // Verify and finish the transaction.
       await _verifyAndFinishTransaction(purchasedItem);
     } else {
@@ -88,7 +90,8 @@ class PurchaseHandler {
     try {
       // Acknowledge the purchase on Android.
       if (Platform.isAndroid) {
-        await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(purchasedItem.purchaseToken!);
+        await FlutterInappPurchase.instance
+            .acknowledgePurchaseAndroid(purchasedItem.purchaseToken!);
       }
       // Call API to verify purchase here
       isValid = true; // Assume the verification is successful for this example
@@ -102,7 +105,8 @@ class PurchaseHandler {
     if (isValid) {
       await FlutterInappPurchase.instance.finishTransaction(purchasedItem);
       if (Platform.isIOS) {
-        await FlutterInappPurchase.instance.finishTransactionIOS(purchasedItem.transactionId!);
+        await FlutterInappPurchase.instance
+            .finishTransactionIOS(purchasedItem.transactionId!);
       }
       _purchasedProducts[purchasedItem.productId!] = purchasedItem;
       ListenerManager.instance.notifyProStatusChangedListeners();
@@ -113,9 +117,9 @@ class PurchaseHandler {
   }
 
   // Checks if a product is purchased based on its ID.
-  bool isProductPurchased(String productId) => _purchasedProducts.containsKey(productId);
+  bool isProductPurchased(String productId) =>
+      _purchasedProducts.containsKey(productId);
 
   // Returns a list of purchased product IDs.
   List<String> getPurchasedProductIds() => _purchasedProducts.keys.toList();
 }
-

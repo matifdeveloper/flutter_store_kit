@@ -63,11 +63,14 @@ class StoreKit {
     }
 
     // Listen for connection updates.
-    _connectionSubscription = FlutterInappPurchase.connectionUpdated.listen((_) {});
+    _connectionSubscription =
+        FlutterInappPurchase.connectionUpdated.listen((_) {});
     // Listen for purchase updates and handle them using the PurchaseHandler.
-    _purchaseUpdatedSubscription = FlutterInappPurchase.purchaseUpdated.listen(_purchaseHandler.handlePurchaseUpdate);
+    _purchaseUpdatedSubscription = FlutterInappPurchase.purchaseUpdated
+        .listen(_purchaseHandler.handlePurchaseUpdate);
     // Listen for purchase errors and notify error listeners.
-    _purchaseErrorSubscription = FlutterInappPurchase.purchaseError.listen((error) {
+    _purchaseErrorSubscription =
+        FlutterInappPurchase.purchaseError.listen((error) {
       if (error != null) {
         // Notify error listeners with the error message.
         _listenerManager.notifyErrorListeners(error.message!);
@@ -87,13 +90,17 @@ class StoreKit {
   }
 
   // Adds a listener for pro status changes.
-  void addProStatusChangedListener(VoidCallback callback) => _listenerManager.addProStatusChangedListener(callback);
+  void addProStatusChangedListener(VoidCallback callback) =>
+      _listenerManager.addProStatusChangedListener(callback);
   // Removes a listener for pro status changes.
-  void removeProStatusChangedListener(VoidCallback callback) => _listenerManager.removeProStatusChangedListener(callback);
+  void removeProStatusChangedListener(VoidCallback callback) =>
+      _listenerManager.removeProStatusChangedListener(callback);
   // Adds a listener for errors.
-  void addErrorListener(ValueChanged<String> callback) => _listenerManager.addErrorListener(callback);
+  void addErrorListener(ValueChanged<String> callback) =>
+      _listenerManager.addErrorListener(callback);
   // Removes a listener for errors.
-  void removeErrorListener(ValueChanged<String> callback) => _listenerManager.removeErrorListener(callback);
+  void removeErrorListener(ValueChanged<String> callback) =>
+      _listenerManager.removeErrorListener(callback);
 
   // Restores past purchases for the user.
   Future<void> restorePastPurchases(BuildContext context) async {
@@ -117,7 +124,8 @@ class StoreKit {
   // Opens the subscription management page for the user.
   Future<void> openSubscriptionManagementPage() async {
     // Construct the Android URL for the subscription management page.
-    final androidUrl = Uri.parse('https://play.google.com/store/account/subscriptions');
+    final androidUrl =
+        Uri.parse('https://play.google.com/store/account/subscriptions');
 
     // Check if the URL can be launched.
     if (await canLaunchUrl(androidUrl)) {
@@ -132,7 +140,9 @@ class StoreKit {
   }
 
   // Checks if a product has been purchased.
-  bool isProductPurchased(String productId) => _purchaseHandler.isProductPurchased(productId);
+  bool isProductPurchased(String productId) =>
+      _purchaseHandler.isProductPurchased(productId);
   // Gets a list of purchased product IDs.
-  List<String> getPurchasedProductIds() => _purchaseHandler.getPurchasedProductIds();
+  List<String> getPurchasedProductIds() =>
+      _purchaseHandler.getPurchasedProductIds();
 }

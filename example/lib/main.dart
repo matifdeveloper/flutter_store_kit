@@ -50,7 +50,6 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
   }
 
-
   void _purchaseSubscription(IAPItem item) async {
     await StoreKit.instance.purchaseSubscription(item);
   }
@@ -74,29 +73,31 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _isPremiumUser ? 'You are a Premium User' : 'You are not a Premium User',
+              _isPremiumUser
+                  ? 'You are a Premium User'
+                  : 'You are not a Premium User',
               style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 20),
             _availableProducts.isEmpty
                 ? const CircularProgressIndicator()
                 : ListView.builder(
-              shrinkWrap: true,
-              itemCount: _availableProducts.length,
-              itemBuilder: (context, index) {
-                final product = _availableProducts[index];
-                return ListTile(
-                  title: Text(product.title ?? 'No Title'),
-                  subtitle: Text(product.description ?? 'No Description'),
-                  trailing: _isPremiumUser
-                      ? const Icon(Icons.check, color: Colors.green)
-                      : ElevatedButton(
-                    onPressed: () => _purchaseSubscription(product),
-                    child: const Text('Buy'),
+                    shrinkWrap: true,
+                    itemCount: _availableProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = _availableProducts[index];
+                      return ListTile(
+                        title: Text(product.title ?? 'No Title'),
+                        subtitle: Text(product.description ?? 'No Description'),
+                        trailing: _isPremiumUser
+                            ? const Icon(Icons.check, color: Colors.green)
+                            : ElevatedButton(
+                                onPressed: () => _purchaseSubscription(product),
+                                child: const Text('Buy'),
+                              ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ],
         ),
       ),
