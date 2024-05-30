@@ -1,5 +1,5 @@
 name: flutter_store_kit
-description: "A Flutter store kit for in-app subscriptions."
+description: "Simplify in-app purchases in Flutter apps with `FlutterStoreKit`. Manage initialization, purchases, and subscriptions with ease. Ideal for premium content and subscriptions."
 homepage: https://github.com/matifdeveloper/flutter_store_kit
 repository: https://github.com/matifdeveloper/flutter_store_kit
 version: 0.0.2
