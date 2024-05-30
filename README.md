@@ -2,18 +2,6 @@
 
 FlutterStoreKit is a Flutter library that provides functionality for managing in-app purchases and subscriptions. This documentation outlines how to use the FlutterStoreKit library in your Flutter app.
 
-## Installation
-
-Add the following to your `pubspec.yaml`:
-
-```dart
-yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  flutter_store_kit: ^1.0.0
-```
-
 ### 1. Initialize the Store
 Initialize the store with your product IDs:
 
