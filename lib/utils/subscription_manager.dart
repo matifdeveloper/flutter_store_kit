@@ -30,6 +30,9 @@ import 'listener_manager.dart';
 class SubscriptionManager {
   // A list to store the subscription items fetched from the store.
   List<IAPItem> _subscriptionItems = [];
+  List<IAPItem> get subscriptionItems => _subscriptionItems;
+
+
   // A list of subscription IDs for different premium features.
   late List<String> _subscriptionIds;
 

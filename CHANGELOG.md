@@ -1,3 +1,3 @@
 ## 0.0.3
 
-* Description added
+* Get subscription items

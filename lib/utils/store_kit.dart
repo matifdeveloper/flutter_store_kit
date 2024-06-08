@@ -30,6 +30,7 @@ import 'subscription_manager.dart';
 class StoreKit {
   // Private constructor to ensure singleton instance.
   StoreKit._private();
+
   // The singleton instance of the StoreService.
   static final StoreKit instance = StoreKit._private();
 
@@ -92,15 +93,21 @@ class StoreKit {
   // Adds a listener for pro status changes.
   void addProStatusChangedListener(VoidCallback callback) =>
       _listenerManager.addProStatusChangedListener(callback);
+
   // Removes a listener for pro status changes.
   void removeProStatusChangedListener(VoidCallback callback) =>
       _listenerManager.removeProStatusChangedListener(callback);
+
   // Adds a listener for errors.
   void addErrorListener(ValueChanged<String> callback) =>
       _listenerManager.addErrorListener(callback);
+
   // Removes a listener for errors.
   void removeErrorListener(ValueChanged<String> callback) =>
       _listenerManager.removeErrorListener(callback);
+
+  // get subscription items list
+  List<IAPItem> get subscriptionItems => _subscriptionManager.subscriptionItems;
 
   // Restores past purchases for the user.
   Future<void> restorePastPurchases(BuildContext context) async {
@@ -142,6 +149,7 @@ class StoreKit {
   // Checks if a product has been purchased.
   bool isProductPurchased(String productId) =>
       _purchaseHandler.isProductPurchased(productId);
+
   // Gets a list of purchased product IDs.
   List<String> getPurchasedProductIds() =>
       _purchaseHandler.getPurchasedProductIds();
