@@ -32,7 +32,6 @@ class SubscriptionManager {
   List<IAPItem> _subscriptionItems = [];
   List<IAPItem> get subscriptionItems => _subscriptionItems;
 
-
   // A list of subscription IDs for different premium features.
   late List<String> _subscriptionIds;
 
