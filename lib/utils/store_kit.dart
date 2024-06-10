@@ -153,4 +153,8 @@ class StoreKit {
   // Gets a list of purchased product IDs.
   List<String> getPurchasedProductIds() =>
       _purchaseHandler.getPurchasedProductIds();
+
+  // Gets a list of subscription product IDs.
+  List<IAPItem> getItemsByIds(List<String> ids) =>
+      _subscriptionManager.getItemsByIds(ids);
 }

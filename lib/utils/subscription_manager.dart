@@ -28,17 +28,24 @@ import 'listener_manager.dart';
 
 // A class that manages subscriptions for in-app purchases.
 class SubscriptionManager {
-  // A list to store the subscription items fetched from the store.
-  List<IAPItem> _subscriptionItems = [];
-  List<IAPItem> get subscriptionItems => _subscriptionItems;
-
-  // A list of subscription IDs for different premium features.
-  late List<String> _subscriptionIds;
-
   // Constructor to initialize the subscription manager with subscription IDs.
   SubscriptionManager(List<String> subscriptionIds) {
     _subscriptionIds = subscriptionIds;
   }
+
+  // A list to store the subscription items fetched from the store.
+  List<IAPItem> _subscriptionItems = [];
+  List<IAPItem> get subscriptionItems => _subscriptionItems;
+
+  // Method to filter items by IDs
+  List<IAPItem> getItemsByIds(List<String> ids) {
+    return _subscriptionItems
+        .where((item) => ids.contains(item.productId))
+        .toList();
+  }
+
+  // A list of subscription IDs for different premium features.
+  late List<String> _subscriptionIds;
 
   // A method to fetch subscription items from the store.
   Future<void> fetchSubscriptionItems() async {
