@@ -25,7 +25,7 @@ import 'listener_manager.dart';
 // A class that handles purchases and updates the state of purchased products.
 class PurchaseHandler {
   // A map to store purchased products, where the key is the product ID and the value is the PurchasedItem object.
-  final Map<String, PurchasedItem> _purchasedProducts = {};
+  Map<String, PurchasedItem> _purchasedProducts = {};
 
   // Handles purchase updates for both Android and iOS platforms.
   Future<void> handlePurchaseUpdate(PurchasedItem? productItem) async {
@@ -108,7 +108,7 @@ class PurchaseHandler {
         await FlutterInappPurchase.instance
             .finishTransactionIOS(purchasedItem.transactionId!);
       }
-      _purchasedProducts[purchasedItem.productId!] = purchasedItem;
+      addPurchasedProduct(purchasedItem.productId!, purchasedItem);
       ListenerManager.instance.notifyProStatusChangedListeners();
     } /*else {
       // Notify error listeners if the verification failed.
@@ -122,4 +122,8 @@ class PurchaseHandler {
 
   // Returns a list of purchased product IDs.
   List<String> getPurchasedProductIds() => _purchasedProducts.keys.toList();
+
+  void addPurchasedProduct(String key, PurchasedItem purchasedItem) {
+    _purchasedProducts[key] = purchasedItem;
+  }
 }

@@ -23,6 +23,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:flutter_store_kit/utils/purchase_handler.dart';
 
 import 'listener_manager.dart';
 
@@ -91,6 +92,9 @@ class SubscriptionManager {
                 // Finish the transaction and notify pro status changed listeners.
                 await FlutterInappPurchase.instance
                     .finishTransaction(purchasedItem);
+
+                PurchaseHandler().addPurchasedProduct(
+                    purchasedItem.productId!, purchasedItem);
                 listenerManager.notifyProStatusChangedListeners();
               }
             } else {
