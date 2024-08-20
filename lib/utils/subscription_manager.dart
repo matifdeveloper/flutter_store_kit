@@ -18,6 +18,7 @@
  *********************************************************************************/
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -76,41 +77,44 @@ class SubscriptionManager {
       BuildContext context, ListenerManager listenerManager) async {
     try {
       // Get a list of available purchases from the store.
-      List<PurchasedItem>? purchasedItems =
-          await FlutterInappPurchase.instance.getAvailablePurchases();
+      await FlutterInappPurchase.instance.getAvailablePurchases().then((purchasedItems) async {
 
-      if (purchasedItems != null) {
-        // Iterate over each purchased item.
-        for (var purchasedItem in purchasedItems) {
-          if (Platform.isAndroid) {
-            // On Android, decode the transaction receipt and check if it's acknowledged.
-            var receiptData = json.decode(purchasedItem.transactionReceipt!);
-            if (!receiptData['acknowledged']) {
-              // Assume verification is successful for now.
-              bool isValid = true;
-              if (isValid) {
-                // Finish the transaction and notify pro status changed listeners.
-                await FlutterInappPurchase.instance
-                    .finishTransaction(purchasedItem);
+        log('Available purchases -------------> ${purchasedItems?.length}');
 
-                PurchaseHandler().addPurchasedProduct(
-                    purchasedItem.productId!, purchasedItem);
+        if (purchasedItems != null) {
+          // Iterate over each purchased item.
+          for (var purchasedItem in purchasedItems) {
+            if (Platform.isAndroid) {
+              // On Android, decode the transaction receipt and check if it's acknowledged.
+              var receiptData = json.decode(purchasedItem.transactionReceipt!);
+              if (!receiptData['acknowledged']) {
+                // Assume verification is successful for now.
+                bool isValid = true;
+                if (isValid) {
+                  // Finish the transaction and notify pro status changed listeners.
+                  await FlutterInappPurchase.instance
+                      .finishTransaction(purchasedItem);
+
+                  PurchaseHandler().addPurchasedProduct(
+                      purchasedItem.productId!, purchasedItem);
+                  listenerManager.notifyProStatusChangedListeners();
+                }
+              } else {
+                // If the receipt is acknowledged, notify pro status changed listeners.
                 listenerManager.notifyProStatusChangedListeners();
               }
-            } else {
-              // If the receipt is acknowledged, notify pro status changed listeners.
+            } else if (Platform.isIOS) {
+              // On iOS, finish the transaction and notify pro status changed listeners.
+              await FlutterInappPurchase.instance
+                  .finishTransaction(purchasedItem);
+              await FlutterInappPurchase.instance
+                  .finishTransactionIOS(purchasedItem.transactionId!);
               listenerManager.notifyProStatusChangedListeners();
             }
-          } else if (Platform.isIOS) {
-            // On iOS, finish the transaction and notify pro status changed listeners.
-            await FlutterInappPurchase.instance
-                .finishTransaction(purchasedItem);
-            await FlutterInappPurchase.instance
-                .finishTransactionIOS(purchasedItem.transactionId!);
-            listenerManager.notifyProStatusChangedListeners();
           }
         }
-      }
+          });
+
     } catch (e) {
       // Log an error if restoring past purchases fails.
       if (kDebugMode) {
