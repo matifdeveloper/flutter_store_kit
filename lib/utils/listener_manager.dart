@@ -30,11 +30,11 @@ class ListenerManager {
 
   // A list of listeners that will be notified when the pro status changes.
   final ObserverList<ValueChanged<PurchasedItem>> _proStatusChangedListeners =
-  ObserverList<ValueChanged<PurchasedItem>>();
+      ObserverList<ValueChanged<PurchasedItem>>();
 
   // A list of listeners that will be notified when an error occurs.
   final ObserverList<ValueChanged<String>> _errorListeners =
-  ObserverList<ValueChanged<String>>();
+      ObserverList<ValueChanged<String>>();
 
   // Adds a listener to the list of pro status changed listeners.
   void addProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>

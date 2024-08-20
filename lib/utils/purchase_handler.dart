@@ -105,7 +105,8 @@ class PurchaseHandler {
     if (isValid) {
       await FlutterInappPurchase.instance.finishTransaction(purchasedItem);
       if (Platform.isIOS) {
-        await FlutterInappPurchase.instance.finishTransactionIOS(purchasedItem.transactionId!);
+        await FlutterInappPurchase.instance
+            .finishTransactionIOS(purchasedItem.transactionId!);
       }
       addPurchasedProduct(purchasedItem.productId!, purchasedItem);
       ListenerManager.instance.notifyProStatusChangedListeners(purchasedItem);

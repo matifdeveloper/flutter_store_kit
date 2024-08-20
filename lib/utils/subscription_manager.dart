@@ -77,8 +77,9 @@ class SubscriptionManager {
       BuildContext context, ListenerManager listenerManager) async {
     try {
       // Get a list of available purchases from the store.
-      await FlutterInappPurchase.instance.getAvailablePurchases().then((purchasedItems) async {
-
+      await FlutterInappPurchase.instance
+          .getAvailablePurchases()
+          .then((purchasedItems) async {
         log('Available purchases -------------> ${purchasedItems?.length}');
 
         if (purchasedItems != null) {
@@ -97,7 +98,8 @@ class SubscriptionManager {
 
                   PurchaseHandler().addPurchasedProduct(
                       purchasedItem.productId!, purchasedItem);
-                  listenerManager.notifyProStatusChangedListeners(purchasedItem);
+                  listenerManager
+                      .notifyProStatusChangedListeners(purchasedItem);
                 }
               } else {
                 // If the receipt is acknowledged, notify pro status changed listeners.
@@ -113,8 +115,7 @@ class SubscriptionManager {
             }
           }
         }
-          });
-
+      });
     } catch (e) {
       // Log an error if restoring past purchases fails.
       if (kDebugMode) {
