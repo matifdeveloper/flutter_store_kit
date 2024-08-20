@@ -18,6 +18,7 @@
  *********************************************************************************/
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 
 // A singleton class that manages listeners for pro status changed and error events.
 class ListenerManager {
@@ -28,19 +29,19 @@ class ListenerManager {
   static final ListenerManager instance = ListenerManager._private();
 
   // A list of listeners that will be notified when the pro status changes.
-  final ObserverList<VoidCallback> _proStatusChangedListeners =
-      ObserverList<VoidCallback>();
+  final ObserverList<ValueChanged<PurchasedItem>> _proStatusChangedListeners =
+      ObserverList<ValueChanged<PurchasedItem>>();
 
   // A list of listeners that will be notified when an error occurs.
   final ObserverList<ValueChanged<String>> _errorListeners =
       ObserverList<ValueChanged<String>>();
 
   // Adds a listener to the list of pro status changed listeners.
-  void addProStatusChangedListener(VoidCallback callback) =>
+  void addProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
       _proStatusChangedListeners.add(callback);
 
   // Removes a listener from the list of pro status changed listeners.
-  void removeProStatusChangedListener(VoidCallback callback) =>
+  void removeProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
       _proStatusChangedListeners.remove(callback);
 
   // Adds a listener to the list of error listeners.
@@ -52,10 +53,10 @@ class ListenerManager {
       _errorListeners.remove(callback);
 
   // Notifies all pro status changed listeners.
-  void notifyProStatusChangedListeners() {
+  void notifyProStatusChangedListeners(PurchasedItem purchasedItem) {
     // Iterate over the list of pro status changed listeners and call each callback.
     for (var callback in _proStatusChangedListeners) {
-      callback();
+      callback(purchasedItem);
     }
   }
 

@@ -97,11 +97,11 @@ class SubscriptionManager {
 
                   PurchaseHandler().addPurchasedProduct(
                       purchasedItem.productId!, purchasedItem);
-                  listenerManager.notifyProStatusChangedListeners();
+                  listenerManager.notifyProStatusChangedListeners(purchasedItem);
                 }
               } else {
                 // If the receipt is acknowledged, notify pro status changed listeners.
-                listenerManager.notifyProStatusChangedListeners();
+                listenerManager.notifyProStatusChangedListeners(purchasedItem);
               }
             } else if (Platform.isIOS) {
               // On iOS, finish the transaction and notify pro status changed listeners.
@@ -109,7 +109,7 @@ class SubscriptionManager {
                   .finishTransaction(purchasedItem);
               await FlutterInappPurchase.instance
                   .finishTransactionIOS(purchasedItem.transactionId!);
-              listenerManager.notifyProStatusChangedListeners();
+              listenerManager.notifyProStatusChangedListeners(purchasedItem);
             }
           }
         }
