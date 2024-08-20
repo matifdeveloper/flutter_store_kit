@@ -91,11 +91,11 @@ class StoreKit {
   }
 
   // Adds a listener for pro status changes.
-  void addProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void addProStatusChangedListener(VoidCallback callback) =>
       _listenerManager.addProStatusChangedListener(callback);
 
   // Removes a listener for pro status changes.
-  void removeProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void removeProStatusChangedListener(VoidCallback callback) =>
       _listenerManager.removeProStatusChangedListener(callback);
 
   // Adds a listener for errors.

@@ -29,19 +29,19 @@ class ListenerManager {
   static final ListenerManager instance = ListenerManager._private();
 
   // A list of listeners that will be notified when the pro status changes.
-  final ObserverList<ValueChanged<PurchasedItem>> _proStatusChangedListeners =
-      ObserverList<ValueChanged<PurchasedItem>>();
+  final ObserverList<VoidCallback> _proStatusChangedListeners =
+      ObserverList<VoidCallback>();
 
   // A list of listeners that will be notified when an error occurs.
   final ObserverList<ValueChanged<String>> _errorListeners =
       ObserverList<ValueChanged<String>>();
 
   // Adds a listener to the list of pro status changed listeners.
-  void addProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void addProStatusChangedListener(VoidCallback callback) =>
       _proStatusChangedListeners.add(callback);
 
   // Removes a listener from the list of pro status changed listeners.
-  void removeProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void removeProStatusChangedListener(VoidCallback callback) =>
       _proStatusChangedListeners.remove(callback);
 
   // Adds a listener to the list of error listeners.
@@ -56,7 +56,7 @@ class ListenerManager {
   void notifyProStatusChangedListeners(PurchasedItem purchasedItem) {
     // Iterate over the list of pro status changed listeners and call each callback.
     for (var callback in _proStatusChangedListeners) {
-      callback(purchasedItem);
+      callback();
     }
   }
 
