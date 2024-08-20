@@ -1,3 +1,3 @@
-## 1.0.1
+## 1.0.2
 
-* minor bugs solve
+* Item in pro status
