@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
     StoreKit.instance.addErrorListener(_onError);
   }
 
-  void _onProStatusChanged() {
+  void _onProStatusChanged(PurchasedItem item) {
     setState(() {
       _isPremiumUser = StoreKit.instance.isProductPurchased('subscription_id1');
     });
