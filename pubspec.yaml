@@ -2,7 +2,7 @@ name: flutter_store_kit
 description: "Simplify in-app purchases in Flutter apps with `FlutterStoreKit`. Manage initialization, purchases, and subscriptions with ease. Ideal for premium content and subscriptions."
 homepage: https://github.com/matifdeveloper/flutter_store_kit
 repository: https://github.com/matifdeveloper/flutter_store_kit
-version: 1.0.2
+version: 1.0.3
 admob_easy:
   path: ../flutter_store_kit
 
@@ -14,7 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_inapp_purchase: ^5.6.1
-  url_launcher: ^6.3.0
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

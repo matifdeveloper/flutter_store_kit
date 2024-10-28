@@ -50,7 +50,7 @@ class PurchaseHandler {
         break;
       case TransactionState.failed:
         // Notify error listeners if the transaction failed.
-        ListenerManager.instance.notifyErrorListeners("Transaction Failed");
+        ListenerManager.instance.notifyErrorListeners();
         break;
       case TransactionState.purchased:
         // Verify and finish the transaction if it's purchased.
@@ -80,7 +80,7 @@ class PurchaseHandler {
       await _verifyAndFinishTransaction(purchasedItem);
     } else {
       // Notify error listeners if something went wrong.
-      ListenerManager.instance.notifyErrorListeners("Something went wrong");
+      ListenerManager.instance.notifyErrorListeners();
     }
   }
 
@@ -97,7 +97,7 @@ class PurchaseHandler {
       isValid = true; // Assume the verification is successful for this example
     } catch (e) {
       // Notify error listeners if something went wrong.
-      ListenerManager.instance.notifyErrorListeners("Something went wrong");
+      ListenerManager.instance.notifyErrorListeners();
       return;
     }
 

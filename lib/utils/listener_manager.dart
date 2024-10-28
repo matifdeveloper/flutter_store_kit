@@ -61,8 +61,10 @@ class ListenerManager {
   }
 
   // Notifies all error listeners with the given error message.
-  void notifyErrorListeners(String error) {
+  void notifyErrorListeners({PurchaseResult? purchaseError}) {
     // Iterate over the list of error listeners and call each callback with the error message.
+    String error =
+        'Error Code: ${purchaseError?.code}, Message: ${purchaseError?.message}';
     for (var callback in _errorListeners) {
       callback(error);
     }

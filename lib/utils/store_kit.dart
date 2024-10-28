@@ -74,7 +74,9 @@ class StoreKit {
         FlutterInappPurchase.purchaseError.listen((error) {
       if (error != null) {
         // Notify error listeners with the error message.
-        _listenerManager.notifyErrorListeners(error.message!);
+        _listenerManager.notifyErrorListeners(
+          purchaseError: error,
+        );
       }
     });
 
