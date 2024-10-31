@@ -33,8 +33,8 @@ class ListenerManager {
       ObserverList<ValueChanged<PurchasedItem>>();
 
   // A list of listeners that will be notified when an error occurs.
-  final ObserverList<ValueChanged<String>> _errorListeners =
-      ObserverList<ValueChanged<String>>();
+  final ObserverList<ValueChanged<PurchaseResult?>> _errorListeners =
+      ObserverList<ValueChanged<PurchaseResult?>>();
 
   // Adds a listener to the list of pro status changed listeners.
   void addProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
@@ -45,11 +45,11 @@ class ListenerManager {
       _proStatusChangedListeners.remove(callback);
 
   // Adds a listener to the list of error listeners.
-  void addErrorListener(ValueChanged<String> callback) =>
+  void addErrorListener(ValueChanged<PurchaseResult?> callback) =>
       _errorListeners.add(callback);
 
   // Removes a listener from the list of error listeners.
-  void removeErrorListener(ValueChanged<String> callback) =>
+  void removeErrorListener(ValueChanged<PurchaseResult?> callback) =>
       _errorListeners.remove(callback);
 
   // Notifies all pro status changed listeners.
@@ -63,10 +63,8 @@ class ListenerManager {
   // Notifies all error listeners with the given error message.
   void notifyErrorListeners({PurchaseResult? purchaseError}) {
     // Iterate over the list of error listeners and call each callback with the error message.
-    String error =
-        'Error Code: ${purchaseError?.code}, Message: ${purchaseError?.message}';
     for (var callback in _errorListeners) {
-      callback(error);
+      callback(purchaseError);
     }
   }
 }

@@ -46,8 +46,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _onError(String error) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+  void _onError(PurchaseResult? error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error?.message ?? "error"),
+      ),
+    );
   }
 
   void _purchaseSubscription(IAPItem item) async {

@@ -101,11 +101,11 @@ class StoreKit {
       _listenerManager.removeProStatusChangedListener(callback);
 
   // Adds a listener for errors.
-  void addErrorListener(ValueChanged<String> callback) =>
+  void addErrorListener(ValueChanged<PurchaseResult?> callback) =>
       _listenerManager.addErrorListener(callback);
 
   // Removes a listener for errors.
-  void removeErrorListener(ValueChanged<String> callback) =>
+  void removeErrorListener(ValueChanged<PurchaseResult?> callback) =>
       _listenerManager.removeErrorListener(callback);
 
   // get subscription items list
