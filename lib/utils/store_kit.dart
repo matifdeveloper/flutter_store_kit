@@ -18,6 +18,7 @@
  *********************************************************************************/
 
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
@@ -131,15 +132,19 @@ class StoreKit {
   }
 
   // Opens the subscription management page for the user.
-  Future<void> openSubscriptionManagementPage() async {
-    // Construct the Android URL for the subscription management page.
+  Future<void> manageSubscription() async {
+    // Construct the URLs for Android and iOS.
     final androidUrl =
         Uri.parse('https://play.google.com/store/account/subscriptions');
+    final iosUrl = Uri.parse('https://apps.apple.com/account/subscriptions');
+
+    // Check the platform and choose the appropriate URL.
+    final url = Platform.isAndroid ? androidUrl : iosUrl;
 
     // Check if the URL can be launched.
-    if (await canLaunchUrl(androidUrl)) {
+    if (await canLaunchUrl(url)) {
       // Launch the URL.
-      await launchUrl(androidUrl);
+      await launchUrl(url);
     } else {
       // Log an error if the URL cannot be launched.
       if (kDebugMode) {
