@@ -30,11 +30,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    StoreKit.instance.initialize([
-      'subscription_id1',
-      'subscription_id2',
-      'subscription_id3',
-    ]);
+    StoreKit.instance.initialize(
+      subscriptionIds: [
+        'subscription_id1',
+        'subscription_id2',
+        'subscription_id3',
+      ],
+    );
 
     StoreKit.instance.addProStatusChangedListener(_onProStatusChanged);
     StoreKit.instance.addErrorListener(_onError);
@@ -55,7 +57,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _purchaseSubscription(IAPItem item) async {
-    await StoreKit.instance.purchaseSubscription(item);
+    await StoreKit.instance.purchase(item);
   }
 
   @override

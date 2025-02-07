@@ -22,6 +22,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:flutter_store_kit/utils/product_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'listener_manager.dart';
 import 'purchase_handler.dart';
@@ -43,12 +44,17 @@ class StoreKit {
   // Instances of PurchaseHandler, SubscriptionManager, and ListenerManager.
   final PurchaseHandler _purchaseHandler = PurchaseHandler();
   late final SubscriptionManager _subscriptionManager;
+  late final ProductManager _productManager;
   final ListenerManager _listenerManager = ListenerManager.instance;
 
   // Initializes the connection to the in-app purchase service.
-  Future<void> initialize(List<String> subscriptionIds) async {
-    // Initialize the SubscriptionManager with subscription IDs.
-    _subscriptionManager = SubscriptionManager(subscriptionIds);
+  Future<void> initialize({
+    List<String>? subscriptionIds,
+    List<String>? productsIds,
+  }) async {
+    // Initialize the SubscriptionManager with subscription IDs & product ids.
+    _subscriptionManager = SubscriptionManager(subscriptionIds ?? []);
+    _productManager = ProductManager(productsIds ?? []);
 
     try {
       // Initialize the FlutterInappPurchase instance.
@@ -81,8 +87,11 @@ class StoreKit {
       }
     });
 
-    // Fetch subscription items.
-    await _subscriptionManager.fetchSubscriptionItems();
+    // Fetch subscription & products items.
+    await Future.wait([
+      _subscriptionManager.fetchSubscriptionItems(),
+      _productManager.fetchProductItems(),
+    ]);
   }
 
   // Disposes of the stream subscriptions and finalizes the FlutterInappPurchase instance.
@@ -112,6 +121,9 @@ class StoreKit {
   // get subscription items list
   List<IAPItem> get subscriptionItems => _subscriptionManager.subscriptionItems;
 
+  // get products items list
+  List<IAPItem> get productItems => _productManager.productItems;
+
   // Restores past purchases for the user.
   Future<void> restorePastPurchases(BuildContext context) async {
     // Restore past purchases using the SubscriptionManager.
@@ -119,10 +131,18 @@ class StoreKit {
   }
 
   // Purchases a subscription item.
-  Future<void> purchaseSubscription(IAPItem item) async {
+  Future<void> purchase(IAPItem item) async {
     try {
-      // Request a subscription purchase using the FlutterInappPurchase instance.
-      await FlutterInappPurchase.instance.requestSubscription(item.productId!);
+      if (_productManager.productItems.contains(item)) {
+        // Request a product purchase using the FlutterInappPurchase instance.
+        await FlutterInappPurchase.instance.requestPurchase(item.productId!);
+      }
+
+      if (_subscriptionManager.subscriptionItems.contains(item)) {
+        // Request a subscription purchase using the FlutterInappPurchase instance.
+        await FlutterInappPurchase.instance
+            .requestSubscription(item.productId!);
+      }
     } catch (e) {
       // Log any errors that occur during the purchase.
       if (kDebugMode) {
@@ -162,6 +182,10 @@ class StoreKit {
       _purchaseHandler.getPurchasedProductIds();
 
   // Gets a list of subscription product IDs.
-  List<IAPItem> getItemsByIds(List<String> ids) =>
+  List<IAPItem> getSubscriptionItemsByIds(List<String> ids) =>
       _subscriptionManager.getItemsByIds(ids);
+
+  // Gets a list of product item IDs.
+  List<IAPItem> getProductsItemsByIds(List<String> ids) =>
+      _productManager.getItemsByIds(ids);
 }
