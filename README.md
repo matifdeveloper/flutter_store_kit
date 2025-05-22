@@ -74,7 +74,7 @@ await StoreKit.instance.purchaseSubscription(subscriptionItem);
 Open the subscription management page for the user:
 
 ```dart
-await StoreKit.instance.openSubscriptionManagementPage();
+await StoreKit.instance.manageSubscription();
 ```
 
 **Check if Product is Purchased**
