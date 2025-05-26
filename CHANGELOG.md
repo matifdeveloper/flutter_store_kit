@@ -1,3 +1,7 @@
+## 2.0.1
+
+* Solved the available purchases issue.
+
 ## 2.0.0
 
 * Solved the products fetching issue.

@@ -37,6 +37,7 @@ class SubscriptionManager {
 
   // A list to store the subscription items fetched from the store.
   List<IAPItem> _subscriptionItems = [];
+
   List<IAPItem> get subscriptionItems => _subscriptionItems;
 
   // Method to filter items by IDs
@@ -73,8 +74,10 @@ class SubscriptionManager {
   }
 
   // A method to restore past purchases and update the pro status.
-  Future<void> restorePastPurchases(
-      BuildContext context, ListenerManager listenerManager) async {
+  Future<List<PurchasedItem>> restorePastPurchases(
+    BuildContext context,
+    ListenerManager listenerManager,
+  ) async {
     try {
       // Get a list of available purchases from the store.
       await FlutterInappPurchase.instance
@@ -115,6 +118,7 @@ class SubscriptionManager {
             }
           }
         }
+        return purchasedItems ?? [];
       });
     } catch (e) {
       // Log an error if restoring past purchases fails.
@@ -122,5 +126,6 @@ class SubscriptionManager {
         print("Failed to restore past purchases: $e");
       }
     }
+    return [];
   }
 }
