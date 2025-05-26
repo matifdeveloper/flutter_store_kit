@@ -1,3 +1,7 @@
+## 2.0.2
+
+* Minor issue fixes.
+
 ## 2.0.1
 
 * Solved the available purchases issue.

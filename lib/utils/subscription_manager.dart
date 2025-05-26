@@ -74,7 +74,7 @@ class SubscriptionManager {
   }
 
   // A method to restore past purchases and update the pro status.
-  Future<List<PurchasedItem>> restorePastPurchases(
+  Future<bool> restorePastPurchases(
     BuildContext context,
     ListenerManager listenerManager,
   ) async {
@@ -98,9 +98,6 @@ class SubscriptionManager {
                   // Finish the transaction and notify pro status changed listeners.
                   await FlutterInappPurchase.instance
                       .finishTransaction(purchasedItem);
-
-                  PurchaseHandler().addPurchasedProduct(
-                      purchasedItem.productId!, purchasedItem);
                   listenerManager
                       .notifyProStatusChangedListeners(purchasedItem);
                 }
@@ -116,9 +113,14 @@ class SubscriptionManager {
                   .finishTransactionIOS(purchasedItem.transactionId!);
               listenerManager.notifyProStatusChangedListeners(purchasedItem);
             }
+            // Add purchase items
+            PurchaseHandler().addPurchasedProduct(
+              purchasedItem.productId!,
+              purchasedItem,
+            );
           }
         }
-        return purchasedItems ?? [];
+        return true;
       });
     } catch (e) {
       // Log an error if restoring past purchases fails.
@@ -126,6 +128,6 @@ class SubscriptionManager {
         print("Failed to restore past purchases: $e");
       }
     }
-    return [];
+    return false;
   }
 }

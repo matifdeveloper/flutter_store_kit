@@ -125,7 +125,7 @@ class StoreKit {
   List<IAPItem> get productItems => _productManager.productItems;
 
   // Restores past purchases for the user.
-  Future<List<PurchasedItem>> restorePastPurchases(BuildContext context) async {
+  Future<bool> restorePastPurchases(BuildContext context) async {
     // Restore past purchases using the SubscriptionManager.
     final result = await _subscriptionManager.restorePastPurchases(
       context,
@@ -182,8 +182,8 @@ class StoreKit {
       _purchaseHandler.isProductPurchased(productId);
 
   // Gets a list of purchased product IDs.
-  List<String> getPurchasedProductIds() =>
-      _purchaseHandler.getPurchasedProductIds();
+  List<String> get getPurchasedProductIds =>
+      _purchaseHandler.getPurchasedProductIds;
 
   // Gets a list of subscription product IDs.
   List<IAPItem> getSubscriptionItemsByIds(List<String> ids) =>

@@ -121,7 +121,7 @@ class PurchaseHandler {
       _purchasedProducts.containsKey(productId);
 
   // Returns a list of purchased product IDs.
-  List<String> getPurchasedProductIds() => _purchasedProducts.keys.toList();
+  List<String> get getPurchasedProductIds => _purchasedProducts.keys.toList();
 
   void addPurchasedProduct(String key, PurchasedItem purchasedItem) {
     _purchasedProducts[key] = purchasedItem;
