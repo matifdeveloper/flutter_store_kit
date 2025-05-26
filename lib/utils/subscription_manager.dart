@@ -114,7 +114,7 @@ class SubscriptionManager {
               listenerManager.notifyProStatusChangedListeners(purchasedItem);
             }
             // Add purchase items
-            PurchaseHandler().addPurchasedProduct(
+            PurchaseHandler.instance.addPurchasedProduct(
               purchasedItem.productId!,
               purchasedItem,
             );

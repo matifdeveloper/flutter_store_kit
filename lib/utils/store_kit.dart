@@ -42,7 +42,7 @@ class StoreKit {
   late final StreamSubscription<PurchaseResult?> _purchaseErrorSubscription;
 
   // Instances of PurchaseHandler, SubscriptionManager, and ListenerManager.
-  final PurchaseHandler _purchaseHandler = PurchaseHandler();
+  final PurchaseHandler _purchaseHandler = PurchaseHandler.instance;
   late final SubscriptionManager _subscriptionManager;
   late final ProductManager _productManager;
   final ListenerManager _listenerManager = ListenerManager.instance;

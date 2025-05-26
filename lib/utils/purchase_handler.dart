@@ -24,6 +24,9 @@ import 'listener_manager.dart';
 
 // A class that handles purchases and updates the state of purchased products.
 class PurchaseHandler {
+  static final instance = PurchaseHandler._privateConstructor();
+  PurchaseHandler._privateConstructor();
+
   // A map to store purchased products, where the key is the product ID and the value is the PurchasedItem object.
   final Map<String, PurchasedItem> _purchasedProducts = {};
 
