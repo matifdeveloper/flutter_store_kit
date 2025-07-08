@@ -139,7 +139,7 @@ class StoreKit {
     try {
       if (_productManager.productItems.contains(item)) {
         // Request a product purchase using the FlutterInappPurchase instance.
-        await FlutterInappPurchase.instance.requestPurchase(item.productId!);
+        await FlutterInappPurchase.instance.requestPurchase(item.productId!, obfuscatedAccountId: "");
       }
 
       if (_subscriptionManager.subscriptionItems.contains(item)) {
