@@ -1,3 +1,7 @@
+## 2.0.4
+
+* iOS 18.x purchase product fix
+
 ## 2.0.3
 
 * Available purchases bug fix.
