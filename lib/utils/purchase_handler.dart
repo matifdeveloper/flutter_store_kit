@@ -13,120 +13,121 @@
 
     Created by Muhammad Atif on 5/29/2024.
     Portfolio https://atifnoori.web.app.
-    IsloAI
 
  *********************************************************************************/
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'listener_manager.dart';
 
-// A class that handles purchases and updates the state of purchased products.
+/// Handles purchases and updates purchased products state.
 class PurchaseHandler {
   static final instance = PurchaseHandler._privateConstructor();
+
   PurchaseHandler._privateConstructor();
 
-  // A map to store purchased products, where the key is the product ID and the value is the PurchasedItem object.
-  final Map<String, PurchasedItem> _purchasedProducts = {};
+  // Map to store purchased products (key = productId)
+  final Map<String, Purchase> _purchasedProducts = {};
 
-  // Handles purchase updates for both Android and iOS platforms.
-  Future<void> handlePurchaseUpdate(PurchasedItem? productItem) async {
-    // If the product item is not null, handle the purchase update based on the platform.
-    if (productItem != null) {
-      if (Platform.isAndroid) {
-        // Handle purchase update for Android.
-        await _handlePurchaseUpdateAndroid(productItem);
-      } else {
-        // Handle purchase update for iOS.
-        await _handlePurchaseUpdateIOS(productItem);
-      }
+  /// Handles purchase updates (cross-platform)
+  Future<void> handlePurchaseUpdate(Purchase? purchase) async {
+    if (purchase == null) return;
+
+    if (Platform.isAndroid) {
+      await _handlePurchaseUpdateAndroid(purchase);
+    } else if (Platform.isIOS) {
+      await _handlePurchaseUpdateIOS(purchase);
     }
   }
 
-  // Handles purchase updates specifically for iOS.
-  Future<void> _handlePurchaseUpdateIOS(PurchasedItem purchasedItem) async {
-    // Switch based on the transaction state of the purchased item.
-    switch (purchasedItem.transactionStateIOS) {
-      case TransactionState.deferred:
-        // Handle deferred transaction state.
-        break;
-      case TransactionState.failed:
-        // Notify error listeners if the transaction failed.
-        ListenerManager.instance.notifyErrorListeners();
-        break;
-      case TransactionState.purchased:
-        // Verify and finish the transaction if it's purchased.
-        await _verifyAndFinishTransaction(purchasedItem);
-        break;
-      case TransactionState.purchasing:
-        // Handle purchasing transaction state.
-        break;
-      case TransactionState.restored:
-        // Finish the transaction if it's restored.
-        await FlutterInappPurchase.instance.finishTransaction(purchasedItem);
-        await FlutterInappPurchase.instance
-            .finishTransactionIOS(purchasedItem.transactionId!);
-        break;
-      default:
-        // Handle default transaction state.
-        break;
-    }
-  }
-
-  // Handles purchase updates specifically for Android.
-  Future<void> _handlePurchaseUpdateAndroid(PurchasedItem purchasedItem) async {
-    // Check if the purchase state is purchased and not acknowledged.
-    if (purchasedItem.purchaseStateAndroid == PurchaseState.purchased &&
-        !purchasedItem.isAcknowledgedAndroid!) {
-      // Verify and finish the transaction.
-      await _verifyAndFinishTransaction(purchasedItem);
-    } else {
-      // Notify error listeners if something went wrong.
-      ListenerManager.instance.notifyErrorListeners();
-    }
-  }
-
-  // Verifies the purchase and finishes the transaction.
-  Future<void> _verifyAndFinishTransaction(PurchasedItem purchasedItem) async {
-    bool isValid = false;
+  /// Handles purchase updates for iOS (new API)
+  Future<void> _handlePurchaseUpdateIOS(Purchase purchase) async {
     try {
-      // Acknowledge the purchase on Android.
-      if (Platform.isAndroid) {
-        await FlutterInappPurchase.instance
-            .acknowledgePurchaseAndroid(purchasedItem.purchaseToken!);
+      switch (purchase.purchaseState) {
+        case PurchaseState.Purchased:
+        case PurchaseState.Restored:
+          await _verifyAndFinishTransaction(purchase);
+          break;
+        case PurchaseState.Pending:
+          log('Purchase pending on iOS...');
+          break;
+        case PurchaseState.Failed:
+          ListenerManager.instance.notifyErrorListeners();
+          break;
+        default:
+          break;
       }
-      // Call API to verify purchase here
-      isValid = true; // Assume the verification is successful for this example
     } catch (e) {
-      // Notify error listeners if something went wrong.
       ListenerManager.instance.notifyErrorListeners();
-      return;
+      log('Error handling iOS purchase: $e');
     }
-
-    // If the verification is successful, finish the transaction and update the purchased products.
-    if (isValid) {
-      await FlutterInappPurchase.instance.finishTransaction(purchasedItem);
-      if (Platform.isIOS) {
-        await FlutterInappPurchase.instance
-            .finishTransactionIOS(purchasedItem.transactionId!);
-      }
-      addPurchasedProduct(purchasedItem.productId!, purchasedItem);
-      ListenerManager.instance.notifyProStatusChangedListeners(purchasedItem);
-    } /*else {
-      // Notify error listeners if the verification failed.
-      //ListenerManager.instance.notifyErrorListeners("Verification failed");
-    }*/
   }
 
-  // Checks if a product is purchased based on its ID.
+  /// Handles purchase updates for Android (new API)
+  Future<void> _handlePurchaseUpdateAndroid(Purchase purchase) async {
+    try {
+      if (purchase.purchaseState == PurchaseState.Purchased ||
+          purchase.purchaseState == PurchaseState.Restored) {
+        await _verifyAndFinishTransaction(purchase);
+      } else if (purchase.purchaseState == PurchaseState.Pending) {
+        log('Purchase pending on Android...');
+      } else {
+        ListenerManager.instance.notifyErrorListeners();
+      }
+    } catch (e) {
+      ListenerManager.instance.notifyErrorListeners();
+      log('Error handling Android purchase: $e');
+    }
+  }
+
+  /// Verifies and finishes a transaction (new unified API)
+  Future<void> _verifyAndFinishTransaction(Purchase purchase) async {
+    bool isValid = false;
+
+    try {
+      // 🔒 Step 1: Verify purchase on your server
+      // Replace with your real verification logic
+      isValid = true;
+
+      // 🧾 Step 2: Deliver content if verified
+      if (isValid) {
+        await deliverContent(purchase.productId);
+      }
+
+      // ✅ Step 3: Finish transaction (consumable or non-consumable)
+      await FlutterInappPurchase.instance.finishTransaction(
+        purchase: purchase,
+        isConsumable: false, // or true for consumables
+      );
+
+      // 🗂 Step 4: Update state and notify listeners
+      addPurchasedProduct(purchase.productId, purchase);
+      ListenerManager.instance.notifyProStatusChangedListeners(purchase);
+    } catch (e) {
+      ListenerManager.instance.notifyErrorListeners();
+      log('Error verifying or finishing transaction: $e');
+    }
+  }
+
+  /// Checks if a product is purchased
   bool isProductPurchased(String productId) =>
       _purchasedProducts.containsKey(productId);
 
-  // Returns a list of purchased product IDs.
+  /// Returns a list of purchased product IDs
   List<String> get getPurchasedProductIds => _purchasedProducts.keys.toList();
 
-  void addPurchasedProduct(String key, PurchasedItem purchasedItem) {
-    _purchasedProducts[key] = purchasedItem;
+  /// Adds a purchased product to the cache
+  void addPurchasedProduct(String key, Purchase purchase) {
+    _purchasedProducts[key] = purchase;
+  }
+
+  /// Example content delivery
+  Future<void> deliverContent(String productId) async {
+    if (productId == 'premium_upgrade') {
+      log('Premium unlocked for $productId');
+      // Update user flags, backend, or local storage here
+    }
   }
 }

@@ -13,7 +13,6 @@
 
     Created by Muhammad Atif on 5/29/2024.
     Portfolio https://atifnoori.web.app.
-    IsloAI
 
  *********************************************************************************/
 
@@ -21,12 +20,14 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:flutter_store_kit/utils/product_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'listener_manager.dart';
 import 'purchase_handler.dart';
 import 'subscription_manager.dart';
+import 'package:flutter_inapp_purchase/helpers.dart' show ConnectionResult;
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart'
+    hide ConnectionResult;
 
 // A singleton class that provides a service for managing in-app purchases.
 class StoreKit {
@@ -38,14 +39,16 @@ class StoreKit {
 
   // Late-initialized variables for stream subscriptions.
   late final StreamSubscription<ConnectionResult> _connectionSubscription;
-  late final StreamSubscription<PurchasedItem?> _purchaseUpdatedSubscription;
-  late final StreamSubscription<PurchaseResult?> _purchaseErrorSubscription;
+  late final StreamSubscription<Purchase?> _purchaseUpdatedSubscription;
+  late final StreamSubscription<PurchaseError?> _purchaseErrorSubscription;
 
   // Instances of PurchaseHandler, SubscriptionManager, and ListenerManager.
   final PurchaseHandler _purchaseHandler = PurchaseHandler.instance;
   late final SubscriptionManager _subscriptionManager;
   late final ProductManager _productManager;
   final ListenerManager _listenerManager = ListenerManager.instance;
+
+  final iap = FlutterInappPurchase.instance;
 
   // Initializes the connection to the in-app purchase service.
   Future<void> initialize({
@@ -58,10 +61,10 @@ class StoreKit {
 
     try {
       // Initialize the FlutterInappPurchase instance.
-      final initResult = await FlutterInappPurchase.instance.initialize();
+      final initResult = await iap.initConnection();
       // Log the initialization result.
       if (kDebugMode) {
-        print(initResult ?? 'unknown');
+        print(initResult);
       }
     } catch (e) {
       // Log any errors that occur during initialization.
@@ -71,20 +74,16 @@ class StoreKit {
     }
 
     // Listen for connection updates.
-    _connectionSubscription =
-        FlutterInappPurchase.connectionUpdated.listen((_) {});
+    _connectionSubscription = iap.connectionUpdated.listen((_) {});
     // Listen for purchase updates and handle them using the PurchaseHandler.
-    _purchaseUpdatedSubscription = FlutterInappPurchase.purchaseUpdated
+    _purchaseUpdatedSubscription = iap.purchaseUpdatedListener
         .listen(_purchaseHandler.handlePurchaseUpdate);
     // Listen for purchase errors and notify error listeners.
-    _purchaseErrorSubscription =
-        FlutterInappPurchase.purchaseError.listen((error) {
-      if (error != null) {
-        // Notify error listeners with the error message.
-        _listenerManager.notifyErrorListeners(
-          purchaseError: error,
-        );
-      }
+    _purchaseErrorSubscription = iap.purchaseErrorListener.listen((error) {
+      // Notify error listeners with the error message.
+      _listenerManager.notifyErrorListeners(
+        purchaseError: error,
+      );
     });
 
     // Fetch subscription & products items.
@@ -99,30 +98,30 @@ class StoreKit {
     _connectionSubscription.cancel();
     _purchaseUpdatedSubscription.cancel();
     _purchaseErrorSubscription.cancel();
-    FlutterInappPurchase.instance.finalize();
   }
 
   // Adds a listener for pro status changes.
-  void addProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void addProStatusChangedListener(ValueChanged<Purchase> callback) =>
       _listenerManager.addProStatusChangedListener(callback);
 
   // Removes a listener for pro status changes.
-  void removeProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void removeProStatusChangedListener(ValueChanged<Purchase> callback) =>
       _listenerManager.removeProStatusChangedListener(callback);
 
   // Adds a listener for errors.
-  void addErrorListener(ValueChanged<PurchaseResult?> callback) =>
+  void addErrorListener(ValueChanged<PurchaseError?> callback) =>
       _listenerManager.addErrorListener(callback);
 
   // Removes a listener for errors.
-  void removeErrorListener(ValueChanged<PurchaseResult?> callback) =>
+  void removeErrorListener(ValueChanged<PurchaseError?> callback) =>
       _listenerManager.removeErrorListener(callback);
 
   // get subscription items list
-  List<IAPItem> get subscriptionItems => _subscriptionManager.subscriptionItems;
+  List<ProductCommon> get subscriptionItems =>
+      _subscriptionManager.subscriptionItems;
 
   // get products items list
-  List<IAPItem> get productItems => _productManager.productItems;
+  List<ProductCommon> get productItems => _productManager.productItems;
 
   // Restores past purchases for the user.
   Future<bool> restorePastPurchases(BuildContext context) async {
@@ -135,24 +134,75 @@ class StoreKit {
   }
 
   // Purchases a subscription item.
-  Future<void> purchase(IAPItem item) async {
+  // Purchases a product or subscription item.
+  // Purchases either an in-app product or subscription.
+  Future<void> purchase(ProductCommon product) async {
     try {
-      if (_productManager.productItems.contains(item)) {
-        // Request a product purchase using the FlutterInappPurchase instance.
-        await FlutterInappPurchase.instance.requestPurchase(item.productId!, obfuscatedAccountId: "");
+      final iap = FlutterInappPurchase.instance;
+
+      // 🎯 1. Handle In-App (one-time) products
+      if (product.type == ProductType.InApp) {
+        final requestProps = RequestPurchaseProps.inApp((
+          ios: RequestPurchaseIosProps(sku: product.id),
+          android: RequestPurchaseAndroidProps(
+            skus: [product.id],
+            obfuscatedAccountIdAndroid: "user_id", // optional
+            obfuscatedProfileIdAndroid: "profile_id", // optional
+          ),
+          useAlternativeBilling: null,
+        ));
+
+        await iap.requestPurchase(requestProps);
+        return;
       }
 
-      if (_subscriptionManager.subscriptionItems.contains(item)) {
-        // Request a subscription purchase using the FlutterInappPurchase instance.
-        await FlutterInappPurchase.instance
-            .requestSubscription(item.productId!);
+      // 💳 2. Handle Subscriptions
+      if (product.type == ProductType.Subs) {
+        if (Platform.isAndroid) {
+          final offers = _getAndroidOffers(product);
+          final requestProps = RequestPurchaseProps.subs((
+            ios: null,
+            android: RequestSubscriptionAndroidProps(
+              skus: [product.id],
+              subscriptionOffers: offers.isNotEmpty ? offers : null,
+            ),
+            useAlternativeBilling: null,
+          ));
+
+          await iap.requestPurchase(requestProps);
+        } else if (Platform.isIOS) {
+          final requestProps = RequestPurchaseProps.subs((
+            ios: RequestSubscriptionIosProps(
+              sku: product.id,
+            ),
+            android: null,
+            useAlternativeBilling: null,
+          ));
+
+          await iap.requestPurchase(requestProps);
+        }
       }
     } catch (e) {
-      // Log any errors that occur during the purchase.
       if (kDebugMode) {
-        print("Failed to purchase subscription: $e");
+        print("❌ Failed to purchase: $e");
       }
     }
+  }
+
+  List<AndroidSubscriptionOfferInput> _getAndroidOffers(ProductCommon product) {
+    if (product is ProductAndroid) {
+      final details = product.subscriptionOfferDetailsAndroid;
+      if (details != null && details.isNotEmpty) {
+        return [
+          for (final offer in details)
+            AndroidSubscriptionOfferInput(
+              offerToken: offer.offerToken,
+              sku: product.id, // must use product.id (not basePlanId)
+            ),
+        ];
+      }
+    }
+    return [];
   }
 
   // Opens the subscription management page for the user.
@@ -186,10 +236,10 @@ class StoreKit {
       _purchaseHandler.getPurchasedProductIds;
 
   // Gets a list of subscription product IDs.
-  List<IAPItem> getSubscriptionItemsByIds(List<String> ids) =>
+  List<ProductCommon> getSubscriptionItemsByIds(List<String> ids) =>
       _subscriptionManager.getItemsByIds(ids);
 
   // Gets a list of product item IDs.
-  List<IAPItem> getProductsItemsByIds(List<String> ids) =>
+  List<ProductCommon> getProductsItemsByIds(List<String> ids) =>
       _productManager.getItemsByIds(ids);
 }

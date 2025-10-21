@@ -66,10 +66,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_inapp_purchase
-      sha256: d67544e703439feefe91cab9cb4920cffc0f1576f7ce51a78e3a0a3c5f7d3f1e
+      sha256: "78b2da17eacb7720f79a6c9210c036bb7c5ceaf7e8b62a0460f0bf7bcaa52549"
       url: "https://pub.dev"
     source: hosted
-    version: "5.6.1"
+    version: "7.1.12"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -84,7 +84,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.0.4"
+    version: "3.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter

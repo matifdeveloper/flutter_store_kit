@@ -25,7 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _isPremiumUser = false;
-  final List<IAPItem> _availableProducts = [];
+  final List<ProductCommon> _availableProducts = [];
 
   @override
   void initState() {
@@ -42,13 +42,13 @@ class _HomePageState extends State<HomePage> {
     StoreKit.instance.addErrorListener(_onError);
   }
 
-  void _onProStatusChanged(PurchasedItem item) {
+  void _onProStatusChanged(Purchase item) {
     setState(() {
       _isPremiumUser = StoreKit.instance.isProductPurchased('subscription_id1');
     });
   }
 
-  void _onError(PurchaseResult? error) {
+  void _onError(PurchaseError? error) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(error?.message ?? "error"),
@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _purchaseSubscription(IAPItem item) async {
+  void _purchaseSubscription(ProductCommon item) async {
     await StoreKit.instance.purchase(item);
   }
 
@@ -93,8 +93,8 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: (context, index) {
                       final product = _availableProducts[index];
                       return ListTile(
-                        title: Text(product.title ?? 'No Title'),
-                        subtitle: Text(product.description ?? 'No Description'),
+                        title: Text(product.title),
+                        subtitle: Text(product.description),
                         trailing: _isPremiumUser
                             ? const Icon(Icons.check, color: Colors.green)
                             : ElevatedButton(

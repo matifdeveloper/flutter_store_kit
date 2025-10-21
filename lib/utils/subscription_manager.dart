@@ -13,19 +13,15 @@
 
     Created by Muhammad Atif on 5/29/2024.
     Portfolio https://atifnoori.web.app.
-    IsloAI
 
  *********************************************************************************/
 
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:flutter_store_kit/utils/purchase_handler.dart';
-
 import 'listener_manager.dart';
 
 // A class that manages subscriptions for in-app purchases.
@@ -35,16 +31,16 @@ class SubscriptionManager {
     _subscriptionIds = subscriptionIds;
   }
 
-  // A list to store the subscription items fetched from the store.
-  List<IAPItem> _subscriptionItems = [];
+  final iap = FlutterInappPurchase.instance;
 
-  List<IAPItem> get subscriptionItems => _subscriptionItems;
+  // A list to store the subscription items fetched from the store.
+  List<ProductCommon> _subscriptionItems = [];
+
+  List<ProductCommon> get subscriptionItems => _subscriptionItems;
 
   // Method to filter items by IDs
-  List<IAPItem> getItemsByIds(List<String> ids) {
-    return _subscriptionItems
-        .where((item) => ids.contains(item.productId))
-        .toList();
+  List<ProductCommon> getItemsByIds(List<String> ids) {
+    return _subscriptionItems.where((item) => ids.contains(item.id)).toList();
   }
 
   // A list of subscription IDs for different premium features.
@@ -54,13 +50,15 @@ class SubscriptionManager {
   Future<void> fetchSubscriptionItems() async {
     try {
       // Fetch the subscription items from the store using the subscription IDs.
-      _subscriptionItems = await FlutterInappPurchase.instance
-          .getSubscriptions(_subscriptionIds);
+      _subscriptionItems = await iap.fetchProducts(
+        skus: _subscriptionIds,
+        type: ProductQueryType.Subs,
+      );
 
       // Sort the subscription items in the order of their IDs.
       _subscriptionItems.sort((a, b) => _subscriptionIds
-          .indexOf(a.productId!)
-          .compareTo(_subscriptionIds.indexOf(b.productId!)));
+          .indexOf(a.id)
+          .compareTo(_subscriptionIds.indexOf(b.id)));
 
       if (kDebugMode) {
         print(_subscriptionItems);
@@ -79,55 +77,33 @@ class SubscriptionManager {
     ListenerManager listenerManager,
   ) async {
     try {
-      // Get a list of available purchases from the store.
-      await FlutterInappPurchase.instance
-          .getAvailablePurchases()
-          .then((purchasedItems) async {
-        log('Available purchases -------------> ${purchasedItems?.length}');
+      final iap = FlutterInappPurchase.instance;
 
-        if (purchasedItems != null) {
-          // Iterate over each purchased item.
-          for (var purchasedItem in purchasedItems) {
-            if (Platform.isAndroid) {
-              // On Android, decode the transaction receipt and check if it's acknowledged.
-              var receiptData = json.decode(purchasedItem.transactionReceipt!);
-              if (!receiptData['acknowledged']) {
-                // Assume verification is successful for now.
-                bool isValid = true;
-                if (isValid) {
-                  // Finish the transaction and notify pro status changed listeners.
-                  await FlutterInappPurchase.instance
-                      .finishTransaction(purchasedItem);
-                  listenerManager
-                      .notifyProStatusChangedListeners(purchasedItem);
-                }
-              } else {
-                // If the receipt is acknowledged, notify pro status changed listeners.
-                listenerManager.notifyProStatusChangedListeners(purchasedItem);
-              }
-            } else if (Platform.isIOS) {
-              // On iOS, finish the transaction and notify pro status changed listeners.
-              await FlutterInappPurchase.instance
-                  .finishTransaction(purchasedItem);
-              await FlutterInappPurchase.instance
-                  .finishTransactionIOS(purchasedItem.transactionId!);
-              listenerManager.notifyProStatusChangedListeners(purchasedItem);
-            }
-            // Add purchase items
-            PurchaseHandler.instance.addPurchasedProduct(
-              purchasedItem.productId!,
-              purchasedItem,
-            );
-          }
-        }
-        return true;
-      });
+      // 🔄 Trigger platform restore flow (iOS-compliant)
+      await iap.restorePurchases();
+
+      // 🧾 Get all available (non-consumable + subscription) purchases
+      final purchases = await iap.getAvailablePurchases();
+
+      log('Available purchases -------------> ${purchases.length}');
+
+      for (final purchase in purchases) {
+        // ✅ Notify listeners for each valid purchase
+        listenerManager.notifyProStatusChangedListeners(purchase);
+
+        // ✅ Add purchase item to your PurchaseHandler
+        PurchaseHandler.instance.addPurchasedProduct(
+          purchase.productId,
+          purchase,
+        );
+      }
+
+      return true;
     } catch (e) {
-      // Log an error if restoring past purchases fails.
       if (kDebugMode) {
         print("Failed to restore past purchases: $e");
       }
+      return false;
     }
-    return false;
   }
 }

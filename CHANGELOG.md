@@ -1,3 +1,13 @@
+## 3.0.0
+
+* Migrated to the new unified OpenIAP architecture.
+* Deprecated `IAPItem` replaced with `ProductCommon` for both in-app and subscription products.
+* Replaced `requestSubscription()` and legacy purchase methods with `RequestPurchaseProps`-based flow.
+* Added support for Android `subscriptionOffers` and iOS unified `sku` requests.
+* Improved purchase validation, error handling, and transaction finishing APIs.
+* Updated internal plugin bridge for Android Billing v7 and iOS StoreKit 2 compatibility.
+* Major API redesign for simpler, safer purchase logic.
+
 ## 2.0.4
 
 * iOS 18.x purchase product fix

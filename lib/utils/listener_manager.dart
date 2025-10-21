@@ -13,7 +13,6 @@
 
     Created by Muhammad Atif on 5/29/2024.
     Portfolio https://atifnoori.web.app.
-    IsloAI
 
  *********************************************************************************/
 
@@ -29,31 +28,31 @@ class ListenerManager {
   static final ListenerManager instance = ListenerManager._private();
 
   // A list of listeners that will be notified when the pro status changes.
-  final ObserverList<ValueChanged<PurchasedItem>> _proStatusChangedListeners =
-      ObserverList<ValueChanged<PurchasedItem>>();
+  final ObserverList<ValueChanged<Purchase>> _proStatusChangedListeners =
+      ObserverList<ValueChanged<Purchase>>();
 
   // A list of listeners that will be notified when an error occurs.
-  final ObserverList<ValueChanged<PurchaseResult?>> _errorListeners =
-      ObserverList<ValueChanged<PurchaseResult?>>();
+  final ObserverList<ValueChanged<PurchaseError?>> _errorListeners =
+      ObserverList<ValueChanged<PurchaseError?>>();
 
   // Adds a listener to the list of pro status changed listeners.
-  void addProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void addProStatusChangedListener(ValueChanged<Purchase> callback) =>
       _proStatusChangedListeners.add(callback);
 
   // Removes a listener from the list of pro status changed listeners.
-  void removeProStatusChangedListener(ValueChanged<PurchasedItem> callback) =>
+  void removeProStatusChangedListener(ValueChanged<Purchase> callback) =>
       _proStatusChangedListeners.remove(callback);
 
   // Adds a listener to the list of error listeners.
-  void addErrorListener(ValueChanged<PurchaseResult?> callback) =>
+  void addErrorListener(ValueChanged<PurchaseError?> callback) =>
       _errorListeners.add(callback);
 
   // Removes a listener from the list of error listeners.
-  void removeErrorListener(ValueChanged<PurchaseResult?> callback) =>
+  void removeErrorListener(ValueChanged<PurchaseError?> callback) =>
       _errorListeners.remove(callback);
 
   // Notifies all pro status changed listeners.
-  void notifyProStatusChangedListeners(PurchasedItem purchasedItem) {
+  void notifyProStatusChangedListeners(Purchase purchasedItem) {
     // Iterate over the list of pro status changed listeners and call each callback.
     for (var callback in _proStatusChangedListeners) {
       callback(purchasedItem);
@@ -61,7 +60,7 @@ class ListenerManager {
   }
 
   // Notifies all error listeners with the given error message.
-  void notifyErrorListeners({PurchaseResult? purchaseError}) {
+  void notifyErrorListeners({PurchaseError? purchaseError}) {
     // Iterate over the list of error listeners and call each callback with the error message.
     for (var callback in _errorListeners) {
       callback(purchaseError);
