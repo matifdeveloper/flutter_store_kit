@@ -1,3 +1,7 @@
+## 3.0.1
+
+* iOS purchase product fix
+
 ## 3.0.0
 
 * Migrated to the new unified OpenIAP architecture.

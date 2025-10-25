@@ -47,6 +47,7 @@ class PurchaseHandler {
     try {
       switch (purchase.purchaseState) {
         case PurchaseState.Purchased:
+          await _verifyAndFinishTransaction(purchase);
         case PurchaseState.Restored:
           await _verifyAndFinishTransaction(purchase);
           break;
